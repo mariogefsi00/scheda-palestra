@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Scheda Palestra</title>
+<meta name="theme-color" content="#121315">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/favicon.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Scheda">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: una colonna da telefono, barra gruppi sticky, una scheda per esercizio con kg e serie da spuntare */
+:root{
+  --bg:#f3f3ef; --surface:#ffffff; --fg:#17181a; --muted:#62646a; --line:#dcdcd5;
+  --accent:#f2c200; --accent-ink:#17181a; --done:#2f8f5b;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --body:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121315; --surface:#1c1d20; --fg:#ececea; --muted:#9a9ca2; --line:#2e3034;
+  --accent:#f5c816; --accent-ink:#121315; --done:#4cc38a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121315; --surface:#1c1d20; --fg:#ececea; --muted:#9a9ca2; --line:#2e3034;
+  --accent:#f5c816; --accent-ink:#121315; --done:#4cc38a; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:560px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+
+header h1{font-family:var(--display);font-weight:700;font-size:2.3rem;line-height:1;margin:0;letter-spacing:.01em;text-transform:uppercase;text-wrap:balance}
+header h1 span{background:var(--accent);color:var(--accent-ink);padding:0 .2em}
+header p{margin:.6rem 0 0;color:var(--muted);font-size:.9rem}
+
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);margin:16px calc(-1 * max(16px,env(safe-area-inset-left,0px))) 0;padding:10px max(16px,env(safe-area-inset-left,0px));display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line)}
+nav::-webkit-scrollbar{display:none}
+nav a{flex:none;font-family:var(--display);font-weight:600;font-size:1rem;letter-spacing:.04em;text-transform:uppercase;color:var(--fg);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:4px 12px;background:var(--surface)}
+nav a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+section{margin-top:28px;scroll-margin-top:calc(env(safe-area-inset-top,0px) + 64px)}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:10px}
+h2{font-family:var(--display);font-weight:700;font-size:1.6rem;text-transform:uppercase;letter-spacing:.02em;margin:0}
+.tag{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.list{display:flex;flex-direction:column;gap:10px}
+
+.ex{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:10px}
+.ex.complete{border-color:var(--done)}
+.top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.top>div{min-width:0}
+.name{font-weight:600;font-size:1rem;margin:0}
+.machine{color:var(--muted);font-size:.85rem;margin:2px 0 0}
+.badge{display:inline-block;margin-left:6px;font-size:.68rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;background:var(--accent);color:var(--accent-ink);border-radius:4px;padding:1px 5px;vertical-align:2px}
+.scheme{flex:none;font-family:var(--display);font-weight:700;font-size:1.25rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.sets{display:flex;gap:8px}
+.set{width:38px;height:38px;border-radius:50%;border:2px solid var(--line);background:transparent;color:var(--muted);font:600 .85rem var(--body);cursor:pointer}
+.set.on{background:var(--done);border-color:var(--done);color:#fff}
+.set.opt{border-style:dashed}
+.kg{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:.85rem}
+.kg input{width:76px;padding:7px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);font:600 1rem var(--body);font-variant-numeric:tabular-nums;text-align:right}
+
+.reset{margin-top:28px;width:100%;padding:14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font:600 .95rem var(--body);cursor:pointer}
+.reset.arm{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+
+.rules{margin-top:32px;border-top:2px solid var(--fg);padding-top:14px}
+.rules h2{font-size:1.3rem}
+.rules ul{margin:8px 0 0;padding-left:18px;display:grid;gap:6px;color:var(--fg)}
+.rules li::marker{color:var(--muted)}
+.foot{margin-top:18px;color:var(--muted);font-size:.78rem}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}.set{transition:background .15s,border-color .15s}}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header>
+    <h1>Scheda <span>palestra</span></h1>
+    <p>Monofrequenza · 2-3 serie allenanti per esercizio</p>
+  </header>
+  <nav id="nav" aria-label="Gruppi muscolari"></nav>
+  <main id="main"></main>
+
+  <div class="rules">
+    <h2>Regole</h2>
+    <ul>
+      <li>3 serie segnate per esercizio: decidi tu se farne 2 o 3, non di più.</li>
+      <li>Fermati a 1-2 ripetizioni dal cedimento, soprattutto prima di muay thai.</li>
+      <li>Quando arrivi in cima al range di ripetizioni su tutte le serie, aumenta il peso.</li>
+      <li>Gambe extra: anche una volta ogni 2 settimane. Nel weekend squat a corpo libero con le trazioni.</li>
+      <li>Se torni sulle gambe dopo tanto tempo, carichi leggeri la prima volta.</li>
+    </ul>
+  </div>
+  <p class="foot">Le serie spuntate si cancellano quando chiudi o ricarichi la pagina. Restano salvati solo i kg, su questo telefono.</p>
+</div>
+
+<script>
+const GROUPS=[
+ {id:"schiena",name:"Schiena",ex:[
+  ["Lat machine","Cable Station","8-10"],
+  ["Pulley con triangolo","Cable Station","8-10"],
+  ["Row alto, focus upper back","Pure Row · presa larga, gomiti alti","10-12"]]},
+ {id:"petto",name:"Petto",ex:[
+  ["Spinte panca inclinata 30°","Multipower + panca regolabile","6-10"],
+  ["Chest press","Pure Chest Press","8-10"],
+  ["Croci / pec fly","Dual Pectoral Fly","10-15",2]]},
+ {id:"spalle",name:"Spalle",ex:[
+  ["Spinte spalle","Pure Shoulder Press","8-10"],
+  ["Alzate laterali","Manubri o cavo, quello libero","12-15",3,"2× sett"]]},
+ {id:"bicipiti",name:"Bicipiti",ex:[
+  ["Curl con manubri","Seduto o in piedi","8-12"],
+  ["Curl a martello con corda","Cavo basso · Cable Station","10-12",2]]},
+ {id:"tricipiti",name:"Tricipiti",ex:[
+  ["Pushdown","Cable Station","10-12"],
+  ["Overhead extension","Cable Station","10-12",2]]},
+ {id:"gambe",name:"Gambe",tag:"Extra",ex:[
+  ["Belt squat","Belt Squat · piedi larghi, bacino indietro","8-12"],
+  ["Leg extension","Pure Leg Extension","12-15",2]]}
+];
+const KEY="scheda-cus-v1";
+let st={};
+try{st=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){st={}}
+const save=()=>{const out={};for(const k in st)if(st[k].kg)out[k]={kg:st[k].kg};try{localStorage.setItem(KEY,JSON.stringify(out))}catch(e){}};
+const nav=document.getElementById("nav"),main=document.getElementById("main");
+
+GROUPS.forEach(g=>{
+  const a=document.createElement("a");a.href="#"+g.id;a.textContent=g.name;nav.append(a);
+  const s=document.createElement("section");s.id=g.id;
+  s.innerHTML=`<div class="sec-head"><h2>${g.name}</h2>${g.tag?`<span class="tag">${g.tag}</span>`:""}</div><div class="list"></div>`;
+  const list=s.querySelector(".list");
+  g.ex.forEach((e,i)=>{
+    const [name,machine,reps,maxSets=3,badge]=e, id=g.id+"-"+i;
+    const minSets=2, total=3, sets="3";
+    const rec=st[id]||(st[id]={kg:""});
+    rec.done=[];
+    const card=document.createElement("div");card.className="ex";
+    card.innerHTML=`<div class="top"><div><p class="name">${name}${badge?`<span class="badge">${badge}</span>`:""}</p><p class="machine">${machine}</p></div><div class="scheme">${sets} × ${reps}</div></div>
+    <div class="row"><div class="sets"></div><label class="kg" for="kg-${id}">kg <input id="kg-${id}" type="number" inputmode="decimal" step="0.5" min="0" placeholder="–" value="${rec.kg}"></label></div>`;
+    const setsEl=card.querySelector(".sets");
+    const paint=()=>{card.classList.toggle("complete",rec.done.filter(Boolean).length>=minSets)};
+    for(let k=0;k<total;k++){
+      const b=document.createElement("button");b.type="button";b.className="set";
+      b.textContent=k+1;b.setAttribute("aria-pressed",!!rec.done[k]);b.setAttribute("aria-label",`${name}, serie ${k+1}`);
+      b.onclick=()=>{rec.done[k]=!rec.done[k];b.classList.toggle("on",rec.done[k]);b.setAttribute("aria-pressed",rec.done[k]);paint()};
+      setsEl.append(b);
+    }
+    card.querySelector("input").addEventListener("input",ev=>{rec.kg=ev.target.value;save()});
+    paint();list.append(card);
+  });
+  main.append(s);
+});
+
+if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))}
+</script>
+</body>
+</html>
