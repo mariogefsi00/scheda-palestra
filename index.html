@@ -88,6 +88,8 @@ h2{font-family:var(--display);font-weight:700;font-size:1.6rem;text-transform:up
   <nav id="nav" aria-label="Gruppi muscolari"></nav>
   <main id="main"></main>
 
+  <button class="reset" id="reset" type="button">Azzera le serie spuntate</button>
+
   <div class="rules">
     <h2>Regole</h2>
     <ul>
@@ -98,7 +100,7 @@ h2{font-family:var(--display);font-weight:700;font-size:1.6rem;text-transform:up
       <li>Se torni sulle gambe dopo tanto tempo, carichi leggeri la prima volta.</li>
     </ul>
   </div>
-  <p class="foot">Le serie spuntate si cancellano quando chiudi o ricarichi la pagina. Restano salvati solo i kg, su questo telefono.</p>
+  <p class="foot">Serie spuntate e kg restano salvati su questo telefono finché non li cambi tu. Il pulsante azzera solo le serie, i kg restano.</p>
 </div>
 
 <script>
@@ -127,7 +129,7 @@ const GROUPS=[
 const KEY="scheda-cus-v1";
 let st={};
 try{st=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){st={}}
-const save=()=>{const out={};for(const k in st)if(st[k].kg)out[k]={kg:st[k].kg};try{localStorage.setItem(KEY,JSON.stringify(out))}catch(e){}};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
 const nav=document.getElementById("nav"),main=document.getElementById("main");
 
 GROUPS.forEach(g=>{
@@ -138,17 +140,17 @@ GROUPS.forEach(g=>{
   g.ex.forEach((e,i)=>{
     const [name,machine,reps,maxSets=3,badge]=e, id=g.id+"-"+i;
     const minSets=2, total=3, sets="3";
-    const rec=st[id]||(st[id]={kg:""});
-    rec.done=[];
+    const rec=st[id]||(st[id]={kg:"",done:[]});
+    rec.done=rec.done||[];
     const card=document.createElement("div");card.className="ex";
     card.innerHTML=`<div class="top"><div><p class="name">${name}${badge?`<span class="badge">${badge}</span>`:""}</p><p class="machine">${machine}</p></div><div class="scheme">${sets} × ${reps}</div></div>
     <div class="row"><div class="sets"></div><label class="kg" for="kg-${id}">kg <input id="kg-${id}" type="number" inputmode="decimal" step="0.5" min="0" placeholder="–" value="${rec.kg}"></label></div>`;
     const setsEl=card.querySelector(".sets");
     const paint=()=>{card.classList.toggle("complete",rec.done.filter(Boolean).length>=minSets)};
     for(let k=0;k<total;k++){
-      const b=document.createElement("button");b.type="button";b.className="set";
+      const b=document.createElement("button");b.type="button";b.className="set"+(rec.done[k]?" on":"");
       b.textContent=k+1;b.setAttribute("aria-pressed",!!rec.done[k]);b.setAttribute("aria-label",`${name}, serie ${k+1}`);
-      b.onclick=()=>{rec.done[k]=!rec.done[k];b.classList.toggle("on",rec.done[k]);b.setAttribute("aria-pressed",rec.done[k]);paint()};
+      b.onclick=()=>{rec.done[k]=!rec.done[k];b.classList.toggle("on",rec.done[k]);b.setAttribute("aria-pressed",rec.done[k]);paint();save()};
       setsEl.append(b);
     }
     card.querySelector("input").addEventListener("input",ev=>{rec.kg=ev.target.value;save()});
@@ -156,6 +158,15 @@ GROUPS.forEach(g=>{
   });
   main.append(s);
 });
+
+const r=document.getElementById("reset");let armT;
+r.onclick=()=>{
+  if(!r.classList.contains("arm")){r.classList.add("arm");r.textContent="Tocca ancora per azzerare (i kg restano)";armT=setTimeout(()=>{r.classList.remove("arm");r.textContent="Azzera le serie spuntate"},3000);return}
+  clearTimeout(armT);Object.values(st).forEach(x=>x.done=[]);save();
+  document.querySelectorAll(".set.on").forEach(b=>{b.classList.remove("on");b.setAttribute("aria-pressed","false")});
+  document.querySelectorAll(".ex.complete").forEach(c=>c.classList.remove("complete"));
+  r.classList.remove("arm");r.textContent="Serie azzerate";setTimeout(()=>r.textContent="Azzera le serie spuntate",1500);
+};
 
 if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))}
 </script>
